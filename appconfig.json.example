@@ -1,0 +1,89 @@
+{
+  "_comment": "KTP Cvar Checker FTP - Application Configuration",
+  "_version": "2.0.0-alpha.3",
+
+  "localSyncPath": "N:\\Nein_\\KTPCvarChecker\\Sync\\",
+  "_localSyncPath_description": "Local directory containing files to deploy (plugins, maps, sounds, WADs)",
+
+  "localLogsPath": "N:\\Nein_\\KTPCvarChecker\\Logs\\",
+  "_localLogsPath_description": "Local directory where downloaded logs and reports are saved",
+
+  "maxConcurrentFTP": 5,
+  "_maxConcurrentFTP_description": "Maximum number of parallel FTP connections (1-10 recommended, 5 is optimal)",
+  "_maxConcurrentFTP_note": "Higher values = faster but more network load. Lower values = slower but more stable.",
+
+  "ftpTimeoutSeconds": 300,
+  "_ftpTimeoutSeconds_description": "FTP operation timeout in seconds (300 = 5 minutes)",
+
+  "ftpRetryAttempts": 3,
+  "_ftpRetryAttempts_description": "Number of retry attempts for failed FTP operations",
+  "_ftpRetryAttempts_note": "Uses exponential backoff: 2s, 4s, 8s delays",
+
+  "deployAllMaps": true,
+  "_deployAllMaps_description": "Deploy all .bsp map files from Sync/dod/maps/ directory",
+  "_deployAllMaps_note": "Set to false for faster plugin-only updates (60+ maps can take time)",
+
+  "deployAllSounds": false,
+  "_deployAllSounds_description": "Deploy all .wav sound files from Sync/dod/sound/ directory",
+  "_deployAllSounds_note": "Usually not needed unless sounds changed",
+
+  "deployAllWads": true,
+  "_deployAllWads_description": "Deploy all .wad texture files from Sync/dod/ directory",
+  "_deployAllWads_note": "Required for custom maps with new textures",
+
+  "deployLatestKTP": true,
+  "_deployLatestKTP_description": "Deploy latest KTP Cvar Checker plugins and configs",
+  "_deployLatestKTP_note": "Includes ktp_cvar.amxx, ktp_cvarconfig.amxx, filescheck.amxx, configs, and language files",
+
+  "ignoreRates": false,
+  "_ignoreRates_description": "Ignore rate-related cvar violations in reports (cl_updaterate, cl_cmdrate, rate)",
+  "_ignoreRates_note": "Set to true to focus on cheating cvars only (r_fullbright, gl_clear, etc.)",
+
+  "_file_paths": {
+    "_sync_structure": {
+      "_amxmodx_configs": "Sync/amxmodx/configs/",
+      "_amxmodx_plugins": "Sync/amxmodx/plugins/",
+      "_amxmodx_lang": "Sync/amxmodx/data/lang/",
+      "_dod_maps": "Sync/dod/maps/",
+      "_dod_sounds": "Sync/dod/sound/",
+      "_dod_wads": "Sync/dod/*.wad"
+    },
+    "_remote_paths": {
+      "_configs": "/dod/addons/amxmodx/configs/",
+      "_plugins": "/dod/addons/amxmodx/plugins/",
+      "_lang": "/dod/addons/amxmodx/data/lang/",
+      "_logs": "/dod/addons/amxmodx/logs/",
+      "_maps": "/dod/maps/",
+      "_sounds": "/dod/sound/",
+      "_wads": "/dod/"
+    }
+  },
+
+  "_performance_tips": {
+    "_tip1": "For plugin-only updates: Set deployAllMaps=false, deployAllSounds=false, deployAllWads=false",
+    "_tip2": "For map updates: Set deployAllMaps=true, leave others false unless needed",
+    "_tip3": "Increase maxConcurrentFTP (up to 10) if you have fast internet and stable servers",
+    "_tip4": "Decrease maxConcurrentFTP (to 2-3) if experiencing timeouts or connection issues"
+  },
+
+  "_examples": {
+    "_plugin_update_only": {
+      "deployAllMaps": false,
+      "deployAllSounds": false,
+      "deployAllWads": false,
+      "deployLatestKTP": true
+    },
+    "_full_deployment": {
+      "deployAllMaps": true,
+      "deployAllSounds": true,
+      "deployAllWads": true,
+      "deployLatestKTP": true
+    },
+    "_map_update_only": {
+      "deployAllMaps": true,
+      "deployAllSounds": false,
+      "deployAllWads": true,
+      "deployLatestKTP": false
+    }
+  }
+}

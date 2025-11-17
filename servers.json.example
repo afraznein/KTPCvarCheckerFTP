@@ -1,0 +1,139 @@
+{
+  "servers": [
+    {
+      "region": "NewYork",
+      "hostname": "1911-NY-1",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "NewYork",
+      "hostname": "1911-NY-2",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "NewYork",
+      "hostname": "MTP-NY",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "NewYork",
+      "hostname": "Thunder-NY",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "NewYork",
+      "hostname": "WashedUp-NY",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Chicago",
+      "hostname": "1911-CHI-1",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Chicago",
+      "hostname": "MTP-CHI",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Chicago",
+      "hostname": "Thunder-CHI",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Dallas",
+      "hostname": "1911-DAL-1",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Dallas",
+      "hostname": "ShakyTable-DAL",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Dallas",
+      "hostname": "Kanguh-DAL",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Dallas",
+      "hostname": "Nein-KTP-DAL",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Atlanta",
+      "hostname": "Kanguh-ATL",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "Atlanta",
+      "hostname": "Piff-ATL",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    },
+    {
+      "region": "LosAngeles",
+      "hostname": "CPrice-LA",
+      "ip": "xxx.xxx.xxx.xxx",
+      "port": 21,
+      "username": "ftpuser",
+      "password": "ftppassword",
+      "enabled": true
+    }
+  ]
+}

@@ -357,5 +357,31 @@ MigrationBackup/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/vs
+
+# ============================================================================
+# DoDCvarCheckerFTP Specific
+# ============================================================================
+
+# Configuration files with sensitive server credentials
+servers.json
+appconfig.json
 DoDCvarCheckerFTP/ServerKeysLocal.cs
+
+# Email lists with personal data
 TPG Email Addresses.csv
+*.csv
+
+# Local data directories
+Logs/
+LocalLogs/
+Sync/
+
+# Generated reports
+FULL_CVAR_LOG_*.txt
+*_REPORT_*.txt
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+/claude
