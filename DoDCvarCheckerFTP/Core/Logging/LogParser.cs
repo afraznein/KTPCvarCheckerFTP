@@ -15,7 +15,7 @@ namespace DoDCvarCheckerFTP.Core.Logging
     {
         // Compiled regex patterns for efficient parsing
         private static readonly Regex CvarViolationPattern = new Regex(
-            @"STEAMID:(\d+:\d+:\d+)\s*\|\s*(.+?)\s*\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|\s*Invalid\s+(.+?):\s*(.+?)\s*\(Required:\s*(.+?)\)",
+            @"STEAMID:(\d+:\d+:\d+)\s*\|\s*(.+?)\s*\|\s*(\d+\.\d+\.\d+\.\d+)\s*\|\s*Invalid\s+(.+?):\s*(.+?)\s*\(KTP value:\s*(.+?)\)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase
         );
 
@@ -99,8 +99,8 @@ namespace DoDCvarCheckerFTP.Core.Logging
 
             if (violationText.Contains("Invalid"))
             {
-                // Try to parse: "Invalid cvar_name: value (Required: value)"
-                var parts2 = violationText.Split(new[] { "Invalid", ":", "(Required:", ")" }, StringSplitOptions.RemoveEmptyEntries);
+                // Try to parse: "Invalid cvar_name: value (KTP value: value)"
+                var parts2 = violationText.Split(new[] { "Invalid", ":", "(KTP value:", ")" }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts2.Length >= 3)
                 {
                     cvarName = parts2[0].Trim();

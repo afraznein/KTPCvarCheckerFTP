@@ -426,6 +426,7 @@ namespace DoDCvarCheckerFTP.Core.FTP
         public int TotalFiles { get; set; }
         public int SuccessfulFiles { get; set; }
         public int FailedFiles { get; set; }
+        public int FilesUploaded => SuccessfulFiles; // Alias for backward compatibility
         public List<string> Errors { get; set; } = new List<string>();
 
         public override string ToString()

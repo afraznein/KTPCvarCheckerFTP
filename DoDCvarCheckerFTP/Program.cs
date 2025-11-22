@@ -1638,7 +1638,7 @@ namespace DoDCvarCheckerFTP {
                 System.IO.Directory.CreateDirectory(@"N:\Nein_\KTPCvarChecker\Logs\" + newHOSTNAME);
                 client.DownloadFiles(@"N:\Nein_\KTPCvarChecker\Logs\" + newHOSTNAME, paths);
             }
-            catch (Exception ex) {
+            catch (Exception) {
                 client.HashAlgorithms.GetHashCode();
                 client.Connect();
 
@@ -2322,7 +2322,7 @@ namespace DoDCvarCheckerFTP {
                                     IPDictionary.Add(ip, "");
                                 }
                                 catch {
-                                    string weShouldNotGetHere = "failure";
+                                    // Silently ignore duplicate key exceptions
                                 }
                                 
                             }
@@ -2879,7 +2879,7 @@ namespace DoDCvarCheckerFTP {
         /// <summary>
         /// Optimized CVAR log processing using v2.0.0 CvarLogProcessor (50-100x faster)
         /// </summary>
-        private static async Task ProcessCvarLogs_Optimized(bool ignoreRates) {
+        private static Task ProcessCvarLogs_Optimized(bool ignoreRates) {
             Console.WriteLine($"\n=== NEW Optimized Log Processing (v2.0.0) ===");
             Console.WriteLine($"Ignore rates: {ignoreRates}\n");
 
@@ -2892,7 +2892,7 @@ namespace DoDCvarCheckerFTP {
                     Console.WriteLine($"Please create {configPath} (copy from appconfig.json.example)");
                     Console.WriteLine("\nFalling back to legacy method...\n");
                     ProcessCvarLogs_Legacy(ignoreRates);
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 var config = AppConfig.LoadFromJson(configPath);
@@ -2941,6 +2941,8 @@ namespace DoDCvarCheckerFTP {
                 Console.WriteLine("\nFalling back to legacy method...\n");
                 ProcessCvarLogs_Legacy(ignoreRates);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

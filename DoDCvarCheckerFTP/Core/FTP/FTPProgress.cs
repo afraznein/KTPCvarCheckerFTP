@@ -16,6 +16,16 @@ namespace DoDCvarCheckerFTP.Core.FTP
         public string CurrentFile { get; set; }
 
         /// <summary>
+        /// Current operation being performed (e.g., "Connecting", "Uploading", "Downloading")
+        /// </summary>
+        public string CurrentOperation { get; set; }
+
+        /// <summary>
+        /// Detailed message about the current operation
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
         /// Number of files completed
         /// </summary>
         public int FilesCompleted { get; set; }
