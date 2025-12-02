@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Phase 8: Critical Bug Fixes & Code Cleanup (2025-12-02)
+
+#### Fixed
+- **[CRITICAL]** Null reference exception in FtpWebResponse access (122 occurrences)
+  - Added `GetWebExceptionMessage()` helper method with null checks
+  - Prevents crashes from network timeouts/connection failures
+- **[CRITICAL]** Deadlock risk in FTPClient.Dispose()
+  - Changed `.Wait()` to `.ConfigureAwait(false).GetAwaiter().GetResult()`
+  - Prevents application hangs during resource cleanup
+- **[HIGH]** Input validation in main menu loop
+  - Replaced `Convert.ToInt32()` with `int.TryParse()`
+  - Application no longer crashes on non-numeric input
+- **[HIGH]** Duplicate condition check at line 626
+  - Removed redundant nested if statement
+- **[MEDIUM]** Hardcoded file path in GenerateEmailHashList
+  - Changed to relative path using `Path.Combine()`
+  - Added file existence check before reading
+- **[MEDIUM]** Missing resource disposal in StreamReader
+  - Wrapped StreamReader in using statement
+  - Prevents file handle leaks
+
+#### Changed
+- Updated version to v2.0.0-rc.2
+- Program.cs now uses dynamic `AppVersion.Short` instead of hardcoded version string
+- Improved exception logging in LogParser (no longer silently swallows exceptions)
+- Improved exception logging in FTPClient.Dispose (logs warnings instead of silent suppression)
+
+#### Removed
+- 196 lines of commented-out dead code (FTP upload blocks, TODOs, debug comments)
+- Cleaned up legacy commented error handling with unsafe FtpWebResponse accesses
+
+#### Documentation
+- Updated README.md to v2.0.0-rc.2
+- Updated Version.cs to v2.0.0-rc.2
+- Added comprehensive CHANGELOG entry for Phase 8
+
 ### Phase 7: .NET 8 Upgrade & Production Ready (2025-11-21)
 
 #### Added

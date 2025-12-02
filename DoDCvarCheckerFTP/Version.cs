@@ -27,7 +27,7 @@ namespace DoDCvarCheckerFTP
         /// Pre-release identifier (e.g., "alpha.1", "beta.1", "rc.1")
         /// Empty string for stable releases
         /// </summary>
-        public const string PRE_RELEASE = "rc.1";
+        public const string PRE_RELEASE = "rc.2";
 
         /// <summary>
         /// Build metadata (date in YYYYMMDD format)

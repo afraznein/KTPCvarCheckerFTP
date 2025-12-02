@@ -183,9 +183,10 @@ namespace DoDCvarCheckerFTP.Core.Logging
                     return result;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore parse errors
+                // Log parse errors for debugging
+                Console.WriteLine($"[LogParser] Warning: Failed to parse timestamp '{datePart} {timePart}': {ex.Message}");
             }
 
             return null;

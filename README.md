@@ -10,7 +10,7 @@ Console application for managing multiple DoD servers across North America - aut
 
 DoDCvarCheckerFTP is a C# console application that manages 14+ competitive Day of Defeat servers via FTP. It automates the deployment of KTP Cvar Checker plugins, downloads and processes violation logs, manages server files, and generates reports for server administrators.
 
-**Current Version:** v2.0.0-rc.1 (Release Candidate)
+**Current Version:** v2.0.0-rc.2 (Release Candidate)
 **Legacy Version:** v1.0.0 (09.11.25)
 **Framework:** .NET 8.0 LTS (supported until November 2026)
 **Architecture:** Modern modular design with parallel processing
@@ -18,7 +18,7 @@ DoDCvarCheckerFTP is a C# console application that manages 14+ competitive Day o
 **Test Coverage:** 69 unit tests, 100% pass rate
 **Primary Use:** KTP Competitive DoD Server Infrastructure Management
 
-### Version 2.0.0-rc.1 Highlights
+### Version 2.0.0-rc.2 Highlights
 
 - 🚀 **4.7x Faster FTP** - Parallel uploads (28 min → 6 min)
 - ⚡ **50-100x Faster Log Processing** - Single-pass optimization
@@ -70,7 +70,7 @@ DoDCvarCheckerFTP is a C# console application that manages 14+ competitive Day o
 DoDCvarCheckerFTP/
 ├── DoDCvarCheckerFTP/                      - Main application
 │   ├── Program.cs                          - Main application (legacy + new integration)
-│   ├── Version.cs                          - Semantic versioning (v2.0.0-rc.1)
+│   ├── Version.cs                          - Semantic versioning (v2.0.0-rc.2)
 │   │
 │   ├── Models/                             - Data models
 │   │   ├── ServerInfo.cs                   - Server connection data
@@ -634,7 +634,7 @@ L 11/17/2025 - 14:30:12: [filescheck.amxx] STEAMID:0:1:87654321 | CheaterName | 
 
 ## 📝 Version History
 
-### v2.0.0-rc.1 (2025-11-21) - Current (Release Candidate)
+### v2.0.0-rc.2 (2025-12-02) - Current (Release Candidate)
 **Status:** Production Ready - All 7 Phases Complete
 **Focus:** .NET 8 LTS, Testing, and Quality Assurance
 

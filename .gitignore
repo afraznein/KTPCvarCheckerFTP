@@ -385,3 +385,9 @@ FULL_CVAR_LOG_*.txt
 Thumbs.db
 desktop.ini
 /claude
+
+# Development scripts and utilities
+scripts/
+*.backup
+build.bat
+collect_all_builds.bat

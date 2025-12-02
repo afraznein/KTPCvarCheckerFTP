@@ -274,13 +274,15 @@ namespace DoDCvarCheckerFTP.Core.FTP
                 {
                     if (_isConnected)
                     {
-                        _client.Disconnect().Wait();
+                        // Use ConfigureAwait(false) to prevent potential deadlocks
+                        _client.Disconnect().ConfigureAwait(false).GetAwaiter().GetResult();
                     }
                     _client.Dispose();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Suppress exceptions during disposal
+                    // Log exceptions during disposal for debugging
+                    Console.WriteLine($"[FTPClient] Warning during disposal: {ex.Message}");
                 }
                 finally
                 {

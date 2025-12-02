@@ -42,9 +42,8 @@ namespace DoDCvarCheckerFTP {
 
         static async Task Main(string[] args) {
 
-            // ..\..\..\ for debug
             // ..\..\..\..\ for publish
-            Console.WriteLine($"{Version} | v2.0.0-alpha.4 features available!");
+            Console.WriteLine($"{Version} | {AppVersion.Short} features available!");
             Console.WriteLine("NOTE: Options with (NEW) offer optimized v2.0.0 performance\n");
 
             while (true) {
@@ -65,7 +64,11 @@ namespace DoDCvarCheckerFTP {
                 Console.WriteLine("=================================================================\n");
 
                 string val = Console.ReadLine();
-                int input = Convert.ToInt32(val);
+                if (!int.TryParse(val, out int input))
+                {
+                    Console.WriteLine("Invalid input. Please enter a number between 1 and 12.");
+                    continue;
+                }
                 if (input == 1) {
                     //Get the status of the local files
                     Local_GetAllLocalFiles();
@@ -131,7 +134,6 @@ namespace DoDCvarCheckerFTP {
                     CalculateCorrectScore();
                 }
                 if (input == 10) {
-                    //TODO: Create bulk email
                     GenerateEmailHashList();
                     SendKTPEmail();
                 }
@@ -365,6 +367,30 @@ namespace DoDCvarCheckerFTP {
             #endregion
         }
 
+        /// <summary>
+        /// Helper method to safely extract error message from WebException
+        /// </summary>
+        private static string GetWebExceptionMessage(WebException ex, string filename)
+        {
+            string message = $"Error with: {filename} \r\n";
+            if (ex.Response != null)
+            {
+                try
+                {
+                    message += ((FtpWebResponse)ex.Response).StatusDescription;
+                }
+                catch
+                {
+                    message += ex.Message;
+                }
+            }
+            else
+            {
+                message += ex.Message;
+            }
+            return message;
+        }
+
         public static void FTP_Update(string HOSTNAME, string IP, int PORT, string USERNAME, string PASSWORD) {
             Console.WriteLine(DateTime.Now+" FTP Access to " + HOSTNAME);
             string errorString = "";
@@ -374,43 +400,35 @@ namespace DoDCvarCheckerFTP {
                 #region amx_and_wads
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/configs/amxx.cfg"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\configs\amxx.cfg"); }
                 catch (WebException ex) {
-                    errorString += "Error with: amxx.cfg \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "amxx.cfg");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/configs/plugins.ini"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\configs\plugins.ini"); }
                 catch (WebException ex) {
-                    errorString += "Error with: plugins.ini \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "plugins.ini");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/configs/filelist.ini"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\configs\filelist.ini"); }
                 catch (WebException ex) {
-                    errorString += "Error with: filelist.ini \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "filelist.ini");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/data/lang/ktp_cvar.txt"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\data\lang\ktp_cvar.txt"); }
                 catch (WebException ex) {
-                    errorString += "Error with: ktp_cvar.txt \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "ktp_cvar.txt");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/data/lang/ktp_cvarcfg.txt"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\data\lang\ktp_cvarcfg.txt"); }
                 catch (WebException ex) {
-                    errorString += "Error with: ktp_cvarcfg.txt  \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "ktp_cvarcfg.txt");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/plugins/ktp_cvar.amxx"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\plugins\ktp_cvar.amxx"); }
                 catch (WebException ex) {
-                    errorString += "Error with: ktp_cvar.amxx \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "ktp_cvar.amxx");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/plugins/ktp_cvarconfig.amxx"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\plugins\ktp_cvarconfig.amxx"); }
                 catch (WebException ex) {
-                    errorString += "Error with: ktp_cvarconfig.amxx  \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "ktp_cvarconfig.amxx");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/addons/amxmodx/plugins/filescheck.amxx"), @"N:\Nein_\KTPCvarChecker\Sync\amxmodx\plugins\filescheck.amxx"); }
                 catch (WebException ex) {
-                    errorString += "Error with: \filescheck.amxx  \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "\filescheck.amxx");
                 }
                 Console.WriteLine(DateTime.Now + " Finished writing AMX/KTP Plugins");
 
@@ -418,96 +436,78 @@ namespace DoDCvarCheckerFTP {
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/ace.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\ace.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: ace.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "ace.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_railroad.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_railroad.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_railroad.wad  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_railroad.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_railroad2_b2.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_railroad2_b2.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_railroad2_b2.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_railroad2_b2.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_siena.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_siena.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_siena.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_siena.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/jlord.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\jlord.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: jlord.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "jlord.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/lennonn.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\lennonn.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: lennonn.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "lennonn.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/thunder2.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\thunder2.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: thunder2.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "thunder2.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/cs_havana.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\cs_havana.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: cs_havana.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "cs_havana.wad");
                     }
                     //client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_anzio.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_anzio.wad");
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_advance.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_advance.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_advance.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_advance.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_carta.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_carta.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_carta.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_carta.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_custom.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_custom.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_custom.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_custom.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_emmanuel.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_emmanuel.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_emmanuel.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_emmanuel.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/anjou.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\anjou.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: anjou.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "anjou.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_merderet.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_merderet.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_merderet.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_merderet.wad");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_narby.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_narby.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_narby.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_narby.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_sturm.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_sturm.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_strum.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_strum.wad");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_vicenza.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_vicenza.wad"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_vicenza.wad \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_vicenza.wad");
                     }
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/dod_aleutian_generated.wad"), @"N:\Nein_\KTPCvarChecker\Sync\dod\dod_aleutian_generated.wad"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_aleutian_generated.wad \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_aleutian_generated.wad");
                 }
                 Console.WriteLine(DateTime.Now+" Finished writing .wads");
                 #endregion
@@ -517,131 +517,101 @@ namespace DoDCvarCheckerFTP {
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_harrington.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_harrington.bsp"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_harrington.bsp \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_harrington.bsp");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_harrington.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_harrington.res"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_harrington.res \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_harrington.res");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_halle.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_halle.bsp"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_halle.bsp \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_halle.bsp");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_halle.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_halle.res"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_halle.res \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_halle.res");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_railroad2_test.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_railroad2_test.bsp"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_railroad2_test.bsp \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_railroad2_test.bsp");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_railroad2_test.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_railroad2_test.res"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_railroad2_test.res \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_railroad2_test.res");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_lennon2.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_lennon2.bsp"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_lennon2.bsp \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_lennon2.bsp");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_lennon2.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_lennon2.res"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_lennon2.res \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_lennon2.res");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_thunder2.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_thunder2.bsp"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_thunder2.bsp \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_thunder2.bsp");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_thunder2.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_thunder2.res"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_thunder2.res \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_thunder2.res");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_armory_b6.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_armory_b6.bsp"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_armory_b6.bsp \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_armory_b6.bsp");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_armory_b6.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_armory_b6.res"); }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_armory_b6.res \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_armory_b6.res");
                     }
                 }
 
 
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_railyard_b6.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_railyard_b6.bsp"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_railyard_b6.bsp \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_railyard_b6.bsp");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_railyard_b6.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_railyard_b6.res"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_railyard_b6.res \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_railyard_b6.res");
                 }
 
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_solitude2.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_solitude2.bsp"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_solitude2.bsp \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_solitude2.bsp");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_solitude2.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_solitude2.res"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_solitude2.res \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_solitude2.res");
                 }
 
-                //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_anjou_a5.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_anjou_a5.bsp"); }
-                //catch (WebException ex) {
-                //    errorString += "Error with: dod_anjou_a4.bsp \r\n";
-                //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                //}
-                //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_anjou_a5.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_anjou_a5.res"); }
-                //catch (WebException ex) {
-                //    errorString += "Error with: dod_anjou_a5.res \r\n";
-                //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                //}
 
 
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_saints2_b1.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_saints2_b1.bsp"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_saints2_b1.bsp \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_saints2_b1.bsp");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_saints2_b1.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_saints2_b1.res"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_saints2_b1.res \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_saints2_b1.res");
                 }
 
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_aleutian2_test3.bsp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_aleutian2_test3.bsp"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_aleutian2_test3.bsp \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_aleutian2_test3.bsp");
                 }
                 try { client.UploadFile(new Uri("ftp://" + IP + "/dod/maps/dod_aleutian2_test3.res"), @"N:\Nein_\KTPCvarChecker\Sync\dod\maps\dod_aleutian2_test3.res"); }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_aleutian2_test3.res \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_aleutian2_test3.res");
                 }
 
 
                 Console.WriteLine(DateTime.Now+" Finished writing maps folder");
-                if (errorString != "") { if (errorString != "") { Console.WriteLine(errorString); } }
+                if (errorString != "") { Console.WriteLine(errorString); }
                 errorString = "";
                 #endregion
                 #region overviews
@@ -652,8 +622,7 @@ namespace DoDCvarCheckerFTP {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_harrington.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_harrington.txt");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_harrington overview files \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_harrington overview files");
                     }
 
                     try {
@@ -661,8 +630,7 @@ namespace DoDCvarCheckerFTP {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_halle.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_halle.txt");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_halle overview files \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_halle overview files");
                     }
 
                     try {
@@ -670,16 +638,14 @@ namespace DoDCvarCheckerFTP {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_thunder2.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_thunder2.txt");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_thunder2 overview files \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_thunder2 overview files");
                     }
                     try {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_lennon2.bmp"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_lennon2.bmp");
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_lennon2.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_lennon2.txt");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_lennon2 overview files \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_lennon2 overview files");
                     }
 
                     try {
@@ -687,8 +653,7 @@ namespace DoDCvarCheckerFTP {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_armory_b6.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_armory_b6.txt");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_armory_b6 overview files \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_armory_b6 overview files");
                     }
 
                     try {
@@ -696,8 +661,7 @@ namespace DoDCvarCheckerFTP {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_railroad2_test.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_railroad2_test.txt");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dod_railroad2_test overview files \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dod_railroad2_test overview files");
                     }
                 }
 
@@ -706,8 +670,7 @@ namespace DoDCvarCheckerFTP {
                     client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_railyard_b6.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_railyard_b6.txt");
                 }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_railyard_b6 overview files \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_railyard_b6 overview files");
                 }
 
                 try {
@@ -715,8 +678,7 @@ namespace DoDCvarCheckerFTP {
                     client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_solitude2.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_solitude2.txt");
                 }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_solitude2 overview files \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_solitude2 overview files");
                 }
 
                 //try {
@@ -724,8 +686,6 @@ namespace DoDCvarCheckerFTP {
                 //    client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_anjou_a5.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_anjou_a5.txt");
                 //}
                 //catch (WebException ex) {
-                //    errorString += "Error with: dod_anjou_a5 overview files \r\n";
-                //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
                 //}
 
                
@@ -735,8 +695,6 @@ namespace DoDCvarCheckerFTP {
                 //    client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_saints2_b1.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_saints2_b1.txt");
                 //}
                 //catch (WebException ex) {
-                //    errorString += "Error with: dod_saints2_b1 overview files \r\n";
-                //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
                 //}
 
                 try {
@@ -744,8 +702,7 @@ namespace DoDCvarCheckerFTP {
                     client.UploadFile(new Uri("ftp://" + IP + "/dod/overviews/dod_aleutian2_test3.txt"), @"N:\Nein_\KTPCvarChecker\Sync\dod\overviews\dod_aleutian2_test3.txt");
                 }
                 catch (WebException ex) {
-                    errorString += "Error with: dod_aleutian2_test3 overview files \r\n";
-                    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                    errorString += GetWebExceptionMessage(ex, "dod_aleutian2_test3 overview files");
                 }
 
 
@@ -760,667 +717,409 @@ namespace DoDCvarCheckerFTP {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage1 sound files");
                     }
                     try {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage2 sound files");
                     }
                     try {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage5.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage5.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage5 sound  files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage5 sound  files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage6.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage6.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage6 sound   files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage6 sound   files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage7.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage7.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage7 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage7 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage8.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage8.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage8 sound  files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage8 sound  files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage9.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage9.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage9 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage9 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage10.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage10.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage10 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage10 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/damage11.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\damage11.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: damage11 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "damage11 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/ow.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\ow.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: ow sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "ow sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/goprone.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\goprone.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: goprone sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "goprone sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/jump.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\jump.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: jump sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "jump sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/jumplanding.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\jumplanding.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: jumplanding sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "jumplanding sound files");
                     }
 
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_dirt1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_dirt1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dirt1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dirt1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_dirt2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_dirt2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dirt2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dirt2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_dirt3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_dirt3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dirt3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dirt3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_dirt4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_dirt4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: dirt4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "dirt4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_duct1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_duct1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: duct1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "duct1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_duct2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_duct2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: duct2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "duct2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_duct3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_duct3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: duct3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "duct3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_duct4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_duct4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: duct4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "duct4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_fallpain.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_fallpain.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: fallpain sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "fallpain sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_gravel1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_gravel1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: gravel1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "gravel1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_gravel2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_gravel2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: gravel2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "gravel2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_gravel3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_gravel3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: gravel3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "gravel3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_gravel4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_gravel4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: gravel4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "gravel4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_ladder1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_ladder1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: ladder1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "ladder1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_ladder2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_ladder2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: ladder2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "ladder2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_ladder3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_ladder3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: ladder3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "ladder3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_ladder4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_ladder4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: ladder4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "ladder4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_metal1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_metal1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: metal1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "metal1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_metal2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_metal2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: metal2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "metal2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_metal3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_metal3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: metal3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "metal3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_metal4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_metal4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: metal4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "metal4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_shell1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_shell1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: shell1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "shell1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_shell2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_shell2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: shell2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "shell2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_shell3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_shell3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: shell3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "shell3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_slosh1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_slosh1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: slosh1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "slosh1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_slosh2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_slosh2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: slosh2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "slosh2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_slosh3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_slosh3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: slosh3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "slosh3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_slosh4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_slosh4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: slosh4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "slosh4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_step1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_step1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: step1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "step1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_step2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_step2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: step2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "step2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_step3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_step3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: step3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "step3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_step4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_step4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: step4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "step4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_tile1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_tile1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: tile1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "tile1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_tile2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_tile2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: tile2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "tile2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_tile3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_tile3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: tile3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "tile3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_tile4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_tile4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: tile4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "tile4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_tile5.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_tile5.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: tile5 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "tile5 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wade1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wade1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wade1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wade1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wade2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wade2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wade2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wade2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wade3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wade3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wade3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wade3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wade4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wade4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wade4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wade4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wood1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wood1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wood1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wood1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wood2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wood2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wood2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wood2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wood3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wood3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wood3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wood3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_wood4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_wood4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: wood4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "wood4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_grate1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_grate1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: grate1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "grate1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_grate2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_grate2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: grate2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "grate2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_grate3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_grate3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: grate3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "grate3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_grate4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_grate4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: grate4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "grate4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_swim1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_swim1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: swim1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "swim1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_swim2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_swim2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: swim2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "swim2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_swim3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_swim3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: swim3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "swim3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_swim4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_swim4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: swim4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "swim4 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_snow1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_snow1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: snow1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "snow1 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_snow2.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_snow2.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: snow2 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "snow2 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_snow3.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_snow3.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: snow3 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "snow3 sound files");
                     }
                     try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/pl_snow4.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\pl_snow4.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: snow4 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "snow4 sound files");
                     }
 
                     try {
                         client.UploadFile(new Uri("ftp://" + IP + "/dod/sound/player/headshot1.wav"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sound\player\headshot1.wav");
                     }
                     catch (WebException ex) {
-                        errorString += "Error with: headshot1 sound files  \r\n";
-                        errorString += ((FtpWebResponse)ex.Response).StatusDescription;
+                        errorString += GetWebExceptionMessage(ex, "headshot1 sound files");
                     }
                     Console.WriteLine(DateTime.Now + " Finished writing sounds folder");
                     }
                     #endregion
                     #region configs and msc
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/server.cfg"), @"N:\Nein_\KTPCvarChecker\Sync\dod\server.cfg"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: server.cfg  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/flo_rubble_a.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\flo_rubble_a.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: flo_rubble_a.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/arc_fern.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\arc_fern.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: arc_fern.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/arc_flower.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\arc_flower.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: arc_flower.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/awning2.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\awning2.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: awning2.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/awning4.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\awning4.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: awning4.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/awning6.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\awning6.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: awning6.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/bulb.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\bulb.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: bulb.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/by_canopy.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\by_canopy.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: by_canopy.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/by_cliff_face.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\by_cliff_face.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: by_cliff_face.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/by_pipe_set1.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\by_pipe_set1.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: by_pipe_set1.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/dod_jagd_car.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\dod_jagd_car.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: dod_jagd_car.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/dod_tree1.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\dod_tree1.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: dod_tree1.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/electric_wire1.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\electric_wire1.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: electric_wire1.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/flo_grass2.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\flo_grass2.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: flo_grass2.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/flo_light.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\flo_light.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: flo_light.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/flower12.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\flower12.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: flower12.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/fueltruck.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\fueltruck.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: fueltruck.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/hk_panzer4j_greyfull.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\hk_panzer4j_greyfull.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: hk_panzer4j_greyfull.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/ivy.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\ivy.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: ivy.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/ivy2.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\ivy2.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: ivy2.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/ivy4.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\ivy4.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: ivy4.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/ivy5.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\ivy5.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: ivy5.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/lamp.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\lamp.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: lamp.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/m3_parkbench.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\m3_parkbench.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: m3_parkbench.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/ouitz_hill1.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\ouitz_hill1.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: ouitz_hill1.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/phonepole1.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\phonepole1.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: phonepole1.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/pi_tree3.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\pi_tree3.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: pi_tree3.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/pot_flower4.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\pot_flower4.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: pot_flower4.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/s_window6.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\s_window6.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: s_window6.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/sherman.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\sherman.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: sherman.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/sign_small3.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\sign_small3.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: sign_small3.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/streetlight_saints.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\streetlight_saints.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: streetlight_saints.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
 
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/tree32.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\tree32.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: tree32.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/wirepipe.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\wirepipe.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: wirepipe.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/models/mapmodels/wood_barrel1.mdl"), @"N:\Nein_\KTPCvarChecker\Sync\dod\models\mapmodels\wood_barrel1.mdl"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: wood_barrel1.mdl  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
-                    //try { client.UploadFile(new Uri("ftp://" + IP + "/dod/sprites/mapsprites/stuka_smoke.spr"), @"N:\Nein_\KTPCvarChecker\Sync\dod\sprites\mapsprites\stuka_smoke.spr"); }
-                    //catch (WebException ex) {
-                    //    errorString += "Error with: stuka_smoke.spr  \r\n";
-                    //    errorString += ((FtpWebResponse)ex.Response).StatusDescription;
-                    //}
                     #endregion
                 }
 
@@ -2590,24 +2289,31 @@ namespace DoDCvarCheckerFTP {
         }
 
         public static void GenerateEmailHashList() {
-            String line;
             try {
-                //Pass the file path and file name to the StreamReader constructor
-                StreamReader sr = new StreamReader("N:\\Nein_\\KTPCvarChecker\\KTPCvarChecker\\DoDCvarCheckerFTP\\TPG Email Addresses.csv");
-                int lineCount = 0;
-                //Read the first line of text
-                line = sr.ReadLine();
-                //Continue to read until you reach end of file
-                while (line != null) {
-                    lineCount++;
-                    Console.WriteLine("Reading line " + lineCount + " : " + line);
-                    //write the line to console window
-                    TPGEmailList.Add(line);
-                    //Read the next line
-                    line = sr.ReadLine();
+                // Use relative path from application directory
+                string emailPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TPG Email Addresses.csv");
+
+                if (!File.Exists(emailPath)) {
+                    Console.WriteLine($"Warning: Email list file not found at {emailPath}");
+                    return;
                 }
-                //close the file
-                sr.Close();
+
+                int lineCount = 0;
+                // Use using statement for proper resource disposal
+                using (StreamReader sr = new StreamReader(emailPath)) {
+                    string line;
+                    //Read the first line of text
+                    line = sr.ReadLine();
+                    //Continue to read until you reach end of file
+                    while (line != null) {
+                        lineCount++;
+                        Console.WriteLine("Reading line " + lineCount + " : " + line);
+                        //write the line to console window
+                        TPGEmailList.Add(line);
+                        //Read the next line
+                        line = sr.ReadLine();
+                    }
+                }
                 Console.ReadLine();
             }
             catch (Exception e) {
