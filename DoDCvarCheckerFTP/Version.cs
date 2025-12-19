@@ -27,7 +27,7 @@ namespace DoDCvarCheckerFTP
         /// Pre-release identifier (e.g., "alpha.1", "beta.1", "rc.1")
         /// Empty string for stable releases
         /// </summary>
-        public const string PRE_RELEASE = "rc.2";
+        public const string PRE_RELEASE = "";
 
         /// <summary>
         /// Build metadata (date in YYYYMMDD format)
@@ -87,6 +87,13 @@ namespace DoDCvarCheckerFTP
         /// </summary>
         public static readonly string[] Changelog = new[]
         {
+            "v2.0.0 - Stable Release (2025-12-18)",
+            "  - Promoted from rc.2 to stable release",
+            "  - All 8 development phases complete",
+            "  - Production ready with .NET 8 LTS",
+            "  - 69 unit tests passing (100% pass rate)",
+            "  - 4.7x faster FTP, 50-100x faster log processing",
+            "",
             "v2.0.0-rc.1 - Phase 7: .NET 8 Upgrade & Production Ready (2025-11-21)",
             "  - Upgraded from .NET 6 to .NET 8 LTS (supported until Nov 2026)",
             "  - Fixed all 6 failing unit tests (100% pass rate: 69/69 tests)",

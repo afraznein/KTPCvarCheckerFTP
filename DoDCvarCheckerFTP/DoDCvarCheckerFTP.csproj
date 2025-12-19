@@ -7,6 +7,12 @@
     <StartupObject>DoDCvarCheckerFTP.Program</StartupObject>
     <Win32Resource />
     <NoWin32Manifest>true</NoWin32Manifest>
+    <Version>2.0.0</Version>
+    <Authors>Nein_</Authors>
+    <Company>KTP</Company>
+    <Product>DoD Cvar Checker FTP</Product>
+    <Description>Automated FTP deployment and log monitoring system for KTP competitive Day of Defeat servers</Description>
+    <Copyright>Copyright (c) 2025 KTP</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
